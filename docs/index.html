@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Donut Assistant</title>
+    <meta
+      name="description"
+      content="Donut Assistant is a community-made market and farm companion for Donut SMP. Track prices, estimate profits, and review market trends."
+    />
+    <style>
+      :root {
+        --bg: #0b1020;
+        --bg-soft: #121a2b;
+        --panel: rgba(17, 24, 39, 0.8);
+        --panel-border: rgba(148, 163, 184, 0.18);
+        --card: #111827;
+        --card-alt: #0f172a;
+        --text: #e5eefb;
+        --muted: #a5b4cf;
+        --primary: #7dd3fc;
+        --primary-strong: #38bdf8;
+        --accent: #fbbf24;
+        --success: #34d399;
+        --danger: #f87171;
+        --shadow: 0 20px 40px rgba(15, 23, 42, 0.45);
+      }
+
+      * { box-sizing: border-box; }
+
+      html { scroll-behavior: smooth; }
+
+      body {
+        margin: 0;
+        font-family: Inter, "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top, rgba(56, 189, 248, 0.15), transparent 30%),
+          linear-gradient(180deg, var(--bg) 0%, #0a1020 100%);
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      a { color: inherit; text-decoration: none; }
+
+      .container {
+        width: min(1100px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        backdrop-filter: blur(12px);
+        background: rgba(11, 16, 32, 0.7);
+        border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+      }
+
+      .topbar-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 74px;
+        gap: 20px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+
+      .brand-badge {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        box-shadow: 0 0 18px rgba(125, 211, 252, 0.8);
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .nav a:hover { color: var(--text); }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.9rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 700;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .button:hover {
+        transform: translateY(-1px);
+      }
+
+      .button-primary {
+        background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+        color: #06233a;
+        box-shadow: 0 16px 28px rgba(56, 189, 248, 0.28);
+      }
+
+      .button-secondary {
+        border: 1px solid var(--panel-border);
+        background: rgba(148, 163, 184, 0.04);
+        color: var(--text);
+      }
+
+      .hero {
+        padding: 88px 0 48px;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 30px;
+        align-items: center;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid rgba(125, 211, 252, 0.32);
+        background: rgba(125, 211, 252, 0.07);
+        color: var(--primary);
+        padding: 0.45rem 0.8rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        font-size: clamp(2.8rem, 4vw, 5rem);
+        line-height: 1.04;
+        margin: 20px 0 18px;
+        letter-spacing: -0.06em;
+      }
+
+      .lead {
+        font-size: 1.1rem;
+        color: var(--muted);
+        max-width: 620px;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 28px;
+      }
+
+      .mini-note {
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      .hero-panel {
+        background: linear-gradient(180deg, rgba(17,24,39,0.9), rgba(15,23,42,0.85));
+        border: 1px solid var(--panel-border);
+        border-radius: 22px;
+        box-shadow: var(--shadow);
+        padding: 24px;
+      }
+
+      .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+      }
+
+      .circle-row {
+        display: flex;
+        gap: 8px;
+      }
+
+      .circle {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+
+      .circle.red { background: #f87171; }
+      .circle.yellow { background: #fbbf24; }
+      .circle.green { background: #4ade80; }
+
+      .dashboard {
+        display: grid;
+        gap: 14px;
+      }
+
+      .stat-box {
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(148, 163, 184, 0.12);
+        border-radius: 16px;
+        padding: 16px 18px;
+      }
+
+      .stat-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: var(--muted);
+        font-size: 0.82rem;
+        margin-bottom: 10px;
+      }
+
+      .stat-value {
+        font-size: clamp(1.5rem, 2vw, 2.2rem);
+        font-weight: 800;
+        letter-spacing: -0.05em;
+      }
+
+      .positive { color: var(--success); }
+      .warning { color: var(--accent); }
+
+      section {
+        padding: 30px 0 24px;
+      }
+
+      .section-title {
+        font-size: clamp(1.9rem, 2vw, 2.8rem);
+        margin: 0 0 18px;
+        letter-spacing: -0.05em;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+      }
+
+      .card {
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid var(--panel-border);
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: var(--shadow);
+      }
+
+      .card h3 {
+        margin: 0 0 10px;
+        font-size: 1.2rem;
+      }
+
+      .card p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .pill {
+        display: inline-block;
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(52, 211, 153, 0.12);
+        color: var(--success);
+        border: 1px solid rgba(52, 211, 153, 0.18);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      .callout {
+        margin-top: 28px;
+        background: linear-gradient(135deg, rgba(125, 211, 252, 0.08), rgba(251, 191, 36, 0.08));
+        border: 1px solid rgba(125, 211, 252, 0.18);
+        border-radius: 18px;
+        padding: 22px 24px;
+      }
+
+      .status-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.14);
+        background: rgba(148, 163, 184, 0.04);
+        padding: 0.5rem 0.8rem;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      .footer {
+        padding: 28px 0 42px;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      @media (max-width: 860px) {
+        .hero-grid, .grid-3 { grid-template-columns: 1fr; }
+        .nav { display: none; }
+        .topbar-inner { justify-content: center; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <div class="brand">
+          <span class="brand-badge"></span>
+          <span>Donut Assistant</span>
+        </div>
+        <nav class="nav" aria-label="Main navigation">
+          <a href="#features">Features</a>
+          <a href="#status">Status</a>
+          <a href="#coming-soon">Coming soon</a>
+          <a href="https://136-0-57-123.sslip.io/" target="_blank" rel="noreferrer">Website</a>
+          <a href="https://github.com/suchenchne-cloud/donut-assistant" target="_blank" rel="noreferrer" class="button button-secondary">GitHub</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-grid">
+          <div>
+            <span class="eyebrow">Community-made • Donut SMP</span>
+            <h1>Smarter market decisions for your next big trade.</h1>
+            <p class="lead">
+              Donut Assistant brings together price tracking, profit estimates, and market history in one simple companion for players trying to get ahead in Donut SMP.
+            </p>
+            <div class="hero-actions">
+              <a class="button button-primary" href="https://136-0-57-123.sslip.io/" target="_blank" rel="noreferrer">Open the website</a>
+              <a class="button button-secondary" href="https://github.com/suchenchne-cloud/donut-assistant" target="_blank" rel="noreferrer">View on GitHub</a>
+            </div>
+            <div class="mini-note">Independent project • not officially affiliated with Donut SMP</div>
+          </div>
+
+          <div class="hero-panel" aria-label="Market dashboard preview">
+            <div class="panel-header">
+              <div class="circle-row">
+                <span class="circle red"></span>
+                <span class="circle yellow"></span>
+                <span class="circle green"></span>
+              </div>
+              <span class="pill">Beta</span>
+            </div>
+            <div class="dashboard">
+              <div class="stat-box">
+                <div class="stat-head"><span>AH / Orders</span><span>Live view</span></div>
+                <div class="stat-value">82.4%</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-head"><span>Farm profit</span><span>Estimated</span></div>
+                <div class="stat-value positive">+$124</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-head"><span>Historical trend</span><span>12h</span></div>
+                <div class="stat-value warning">Rising</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="features">
+        <div class="container">
+          <h2 class="section-title">Built for market tracking and farming efficiency</h2>
+          <div class="grid-3">
+            <article class="card">
+              <h3>Price tracking</h3>
+              <p>Monitor Auction House and Orders prices to understand what the market is valuing right now.</p>
+            </article>
+            <article class="card">
+              <h3>Profit calculator</h3>
+              <p>Estimate returns from crop cycles, crafting workflows, and farming operations before committing time.</p>
+            </article>
+            <article class="card">
+              <h3>Market history</h3>
+              <p>Use recorded observations to spot trends and understand whether a price move is unusual or consistent.</p>
+            </article>
+          </div>
+
+          <div class="callout">
+            <strong>Experimental tools:</strong> Donut Assistant includes AH-to-Orders profit estimates and early Fabric mod support to make market analysis easier while the feature set continues to evolve.
+          </div>
+        </div>
+      </section>
+
+      <section id="status">
+        <div class="container">
+          <h2 class="section-title">Status</h2>
+          <p class="lead">
+            Donut Assistant is currently in beta. Data is based on recorded observations rather than guaranteed live pricing, and all profit figures should be treated as informational guidance.
+          </p>
+          <div class="status-row">
+            <span class="tag">Beta testing</span>
+            <span class="tag">Recorded observations</span>
+            <span class="tag">Informational estimates only</span>
+            <span class="tag">Community project</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="coming-soon">
+        <div class="container">
+          <h2 class="section-title">Coming soon</h2>
+          <div class="grid-3">
+            <article class="card">
+              <h3>More reliable scanning</h3>
+              <p>Improved data collection for more consistent and more accurate market coverage.</p>
+            </article>
+            <article class="card">
+              <h3>AI market explanations</h3>
+              <p>Smarter breakdowns of what may be driving price changes and opportunities in the marketplace.</p>
+            </article>
+            <article class="card">
+              <h3>Advanced calculations</h3>
+              <p>Expanded trading, crafting, and farming calculations for more detailed planning.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        Donut Assistant — a free, community-made market and farm companion for Donut SMP.
+      </div>
+    </footer>
+  </body>
+</html>

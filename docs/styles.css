@@ -1,0 +1,9 @@
+body {
+  margin: 0;
+  font-family: Inter, "Segoe UI", sans-serif;
+}
+
+html, body {
+  background: #0b1020;
+  color: #e5eefb;
+}
